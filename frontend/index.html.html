@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bus Route Information System</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Load FontAwesome for animated button icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+  <div class="background-overlay"></div>
+  <header class="main-header">
+    <h1>🚌 Bus Route Information System</h1>
+    <nav>
+      <button class="nav-btn active" id="viewRoutesNav">View Bus Routes</button>
+      <button class="nav-btn" id="trackRoutesNav">Track Bus Routes</button>
+      <button class="nav-btn" id="adminNav">Admin Dashboard</button>
+    </nav>
+  </header>
+
+  <!-- Login Section -->
+  <section id="login-section" class="main-section" style="display:none;">
+    <h2>Admin Login</h2>
+    <form id="adminLoginForm" aria-label="Admin login form">
+      <label for="adminUsername">Username:</label>
+      <input type="text" id="adminUsername" required autocomplete="off" />
+      <label for="adminPassword">Password:</label>
+      <input type="password" id="adminPassword" required autocomplete="off" />
+      <button type="submit">Login</button>
+    </form>
+    <div id="loginError" role="alert" style="color:red; margin-top:10px; display:none;"></div>
+  </section>
+
+  <main>
+    <!-- View Bus Routes Section -->
+    <section id="view-bus-routes" class="main-section">
+      <h2>Browse Available Bus Routes</h2>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Enter route number or stop name" aria-label="Search routes" />
+        <button id="searchBtn">Search</button>
+      </div>
+      <ul id="resultsList"></ul>
+    </section>
+
+    <!-- Track Bus Routes Section -->
+    <section id="track-bus-routes" class="main-section" style="display:none;">
+      <h2>Track Bus Routes</h2>
+      <div class="sub-options">
+        <button class="track-option active" data-option="city">Within City</button>
+        <button class="track-option" data-option="region">Within Region</button>
+      </div>
+      <div id="track-form-city" class="track-form">
+        <label for="fromCity">From (City/Stop):</label>
+        <input type="text" id="fromCity" placeholder="Start location" />
+        <label for="toCity">To (City/Stop):</label>
+        <input type="text" id="toCity" placeholder="Destination" />
+        <button id="trackSearchBtn">Find Route</button>
+      </div>
+      <div id="track-results" aria-live="polite"></div>
+    </section>
+
+    <!-- Route Details Popup -->
+    <div id="route-details-popup" class="modal" style="display:none;">
+      <div class="modal-content">
+        <button class="close-btn" id="closeDetailsBtn" aria-label="Close details">&times;</button>
+        <h2>Bus Route Details</h2>
+        <p><strong>Route Number:</strong> <span id="routeNumber"></span></p>
+        <p><strong>Distance:</strong> <span id="routeDistance"></span> km</p>
+        <p><strong>Duration:</strong> <span id="routeDuration"></span> minutes</p>
+        <h3>Stops</h3>
+        <ol id="stopsList"></ol>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard Section -->
+    <section id="admin-dashboard-section" class="main-section" style="display:none;">
+      <h2>Admin Dashboard</h2>
+      <button id="adminLogoutBtn" style="float:right; background: var(--accent); color: var(--primary); border:none; border-radius:12px; padding:8px 16px; cursor:pointer;">Logout</button>
+      <div id="statsPanel">
+        <p><strong>Total Routes:</strong> <span id="totalRoutesCount">0</span></p>
+        <p><strong>Most Searched Routes:</strong> <span id="mostSearchedRoutes">None Yet</span></p>
+        <p><strong>Feedback Received:</strong> <span id="feedbackCount">0</span></p>
+      </div>
+
+      <div id="manageRoutesPanel">
+        <h3>Manage Routes</h3>
+        <form id="addEditRouteForm">
+          <input type="hidden" id="editRouteNumber" />
+          <label for="editRouteNumberInput">Route Number:</label>
+          <input type="text" id="editRouteNumberInput" required autocomplete="off" />
+          <label for="editDistanceInput">Distance (km):</label>
+          <input type="number" id="editDistanceInput" required min="0" step="0.1" />
+          <label for="editDurationInput">Duration (minutes):</label>
+          <input type="number" id="editDurationInput" required min="0" />
+          <label for="editStopsInput">Stops (comma separated):</label>
+          <textarea id="editStopsInput" rows="3" required></textarea>
+          <label for="editFirstTripInput">First Trip Time (HH:MM):</label>
+          <input type="time" id="editFirstTripInput" />
+          <label for="editLastTripInput">Last Trip Time (HH:MM):</label>
+          <input type="time" id="editLastTripInput" />
+          <button type="submit" id="saveRouteBtn">Save Route</button>
+          <button type="button" id="cancelEditBtn">Cancel</button>
+        </form>
+        <table id="routesTable" aria-label="Routes management table">
+          <thead>
+            <tr>
+              <th>Route No</th><th>Distance (km)</th><th>Duration (min)</th><th>Stops</th><th>1st Trip</th><th>Last Trip</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="manageFeedbackPanel" style="margin-top:2rem;">
+        <h3>User Feedback</h3>
+        <ul id="feedbackList" aria-live="polite" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">
+          <!-- Feedback items -->
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Powered by Bus Route Information System Demo | © 2025</p>
+  </footer>
+
+  <!-- Floating animated Chatbot Access Button -->
+  <button id="chatbot-fab" aria-label="Open chatbot">
+    <i class="fa-solid fa-comments"></i>
+  </button>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot" role="region" aria-label="Bus info chatbot" aria-live="polite" style="display:none;">
+    <div id="chatbot-header" tabindex="0" aria-controls="chatbot-messages" aria-expanded="true">
+      Bus Info Bot
+      <button id="chatbot-toggle" aria-label="Close chatbot">&times;</button>
+    </div>
+    <div id="chatbot-messages" tabindex="0"></div>
+    <div id="chatbot-input">
+      <input type="text" id="chatbot-user-input" placeholder="Ask about bus routes..." autocomplete="off" aria-label="Chat input" />
+      <button id="chatbot-send" aria-label="Send">&#9658;</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
